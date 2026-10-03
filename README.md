@@ -10,6 +10,8 @@ Everything is stored on your device. No account, no server.
 - 12-week heatmap per habit (tap a square to add or remove a day)
 - Weekly goal progress bar
 - Confetti for finishing everything and for 3/7/14/30/50/100/200/365-day streaks
+- Animated progress ring with encouraging messages, habit cards tinted in their colour, flames that grow with your streak
+- Check-off pop + burst, count-up stats, smooth sheet and detail transitions
 - Delete with Undo
 - Light, dark, or match-my-device theme
 - Daily reminder at a time you choose (lists unfinished habits)
