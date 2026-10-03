@@ -36,9 +36,9 @@
 
   $("#hCancel").addEventListener("click", () => dialog.close());
 
-  $("#habitForm").addEventListener("submit", () => {
+  $("#habitForm").addEventListener("submit", e => {
     const name = $("#hName").value.trim();
-    if (!name) return;
+    if (!name) { e.preventDefault(); $("#hName").focus(); return; }
     if (editingId) Store.updateHabit(editingId, { name, emoji, color, target });
     else Store.addHabit({ name, emoji, color, target });
   });
