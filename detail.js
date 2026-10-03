@@ -24,16 +24,33 @@
       '<div class="panel" style="--c:' + esc(h.color) + '"><h4>Last 12 weeks</h4><div class="heat" style="--c:' + esc(h.color) + '">' + cells + '</div><p class="note">Tap a square to add or remove a day.</p></div>';
   }
 
+  // numbers roll up from 0 when the detail view opens
+  function countUp(node) {
+    if (!el.classList.contains("fresh")) return;
+    const m = node.textContent.match(/^(\D*)(\d+)(.*)$/);
+    if (!m) return;
+    const to = Number(m[2]), start = performance.now();
+    (function step(now) {
+      const t = Math.min(1, (now - start) / 600);
+      node.textContent = m[1] + Math.round(to * (1 - Math.pow(1 - t, 3))) + m[3];
+      if (t < 1) requestAnimationFrame(step);
+    })(start);
+  }
+
   function paint() {
     const h = openId && Store.habit(openId);
     if (!h) { el.hidden = true; openId = null; return; }
     const scroll = el.scrollTop;
+    const fresh = el.dataset.open !== h.id;
+    el.dataset.open = h.id;
     el.innerHTML = view(h);
     el.scrollTop = scroll;
+    el.classList.toggle("fresh", fresh);
+    el.querySelectorAll(".tile b").forEach(countUp);
   }
 
   App.openDetail = id => { openId = id; el.hidden = false; paint(); el.scrollTop = 0; };
-  App.closeDetail = () => { openId = null; el.hidden = true; };
+  App.closeDetail = () => { openId = null; el.hidden = true; el.dataset.open = ""; };
   App.refreshDetail = () => { if (openId) paint(); };
 
   el.addEventListener("click", e => {

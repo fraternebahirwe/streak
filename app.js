@@ -37,14 +37,27 @@ const App = (() => {
     return (h < 5 ? "Still up" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + " 🔥";
   }
 
+  const CIRC = 2 * Math.PI * 27;
+  let lastPct = 0;
+  const LINES = [
+    [100, "Perfect day. Go enjoy it 🎉"], [75, "Almost there, keep going! 💪"], [50, "Halfway. You've got this ✨"],
+    [1, "Nice start, one more!"], [0, "A fresh day. Pick one small win."]
+  ];
+
   function renderSummary(habits, k) {
     const el = $("#summary");
     if (!habits.length) { el.hidden = true; return; }
     el.hidden = false;
     const done = habits.filter(h => h.days[k]).length;
     const pct = Math.round(done / habits.length * 100);
-    const msg = done === habits.length ? "All done today! 🎉" : done + " of " + habits.length + " done today";
-    el.innerHTML = '<div class="line"><span>' + msg + "</span><span>" + pct + '%</span></div><div class="bar"><i style="width:' + pct + '%"></i></div>';
+    const line = LINES.find(([min]) => pct >= min)[1];
+    const best = Math.max(0, ...habits.map(h => Stats.currentStreak(h.days, new Date())));
+    el.classList.toggle("complete", pct === 100);
+    el.innerHTML = '<div class="ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="bg" cx="32" cy="32" r="27"/><circle class="fg" cx="32" cy="32" r="27" stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC * (1 - lastPct / 100) + '"/></svg><span>' + done + "/" + habits.length + "</span></div>" +
+      '<div class="msg"><b>' + line + "</b><small>" + (best ? "🔥 Longest active streak: " + best + (best === 1 ? " day" : " days") : "Check off a habit to start a streak") + "</small></div>";
+    const fg = el.querySelector(".fg");
+    requestAnimationFrame(() => requestAnimationFrame(() => { fg.style.strokeDashoffset = CIRC * (1 - pct / 100); }));
+    lastPct = pct;
   }
 
   function habitCard(h, today, k) {
@@ -58,9 +71,10 @@ const App = (() => {
     return '<article class="habit' + (h.days[k] ? " done" : "") + '" data-id="' + h.id + '" style="--c:' + esc(h.color) + '">' +
       '<button class="check" aria-label="Mark ' + esc(h.name) + ' done today">✓</button>' +
       '<div class="info"><h3 role="button" tabindex="0">' + esc(h.emoji) + " " + esc(h.name) + '</h3><div class="week">' + dots + "</div></div>" +
-      '<div class="streak">' + (streak ? "🔥 " + streak : "–") + "<small>" + (streak === 1 ? "day" : "days") + "</small></div></article>";
+      '<div class="streak' + (streak >= 7 ? " hot" : streak >= 3 ? " warm" : "") + '">' + (streak ? '<span class="flame">🔥</span> ' + streak : "–") + "<small>" + (streak === 1 ? "day" : "days") + "</small></div></article>";
   }
 
+  let firstRender = true;
   App.render = function () {
     const today = new Date(), k = Stats.key(today);
     const habits = Store.state.habits;
@@ -73,7 +87,10 @@ const App = (() => {
         SUGGESTIONS.map((s, i) => '<button data-suggest="' + i + '">' + s.emoji + " " + s.name + "</button>").join("") + "</div></div>";
     } else {
       list.innerHTML = habits.map(h => habitCard(h, today, k)).join("");
+      list.classList.toggle("enter", firstRender);
+      if (firstRender) [...list.children].forEach((c, i) => c.style.setProperty("--i", i));
     }
+    firstRender = false;
     if (App.refreshDetail) App.refreshDetail();
   };
 
@@ -83,6 +100,10 @@ const App = (() => {
     const wasAllDone = habits.length > 0 && habits.every(h => h.days[todayKey()]);
     const done = Store.toggleDay(id, k);
     const h = Store.habit(id);
+    if (done) {
+      const card = document.querySelector('.habit[data-id="' + id + '"]');
+      if (card) { card.classList.add("just-done"); setTimeout(() => card.classList.remove("just-done"), 900); }
+    }
     if (!done || !h) return;
     if (k !== todayKey()) return;
     const streak = Stats.currentStreak(h.days, new Date());
