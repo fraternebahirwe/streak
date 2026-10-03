@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ff7a45">
+  <title>Streak</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <p class="date" id="date"></p>
+      <h1 id="greeting">Streak 🔥</h1>
+    </div>
+    <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙️</button>
+  </header>
+
+  <section class="summary" id="summary" aria-live="polite"></section>
+  <main id="list"></main>
+
+  <button id="addBtn" class="fab" aria-label="Add habit">＋</button>
+
+  <section id="detail" class="detail" hidden></section>
+
+  <dialog id="habitDialog">
+    <form method="dialog" id="habitForm">
+      <h2 id="habitDialogTitle">New habit</h2>
+      <label>Name<input id="hName" maxlength="40" required placeholder="e.g. Drink water"></label>
+      <fieldset><legend>Icon</legend><div id="hEmojis" class="emoji-grid"></div></fieldset>
+      <fieldset><legend>Colour</legend><div id="hColors" class="color-row"></div></fieldset>
+      <fieldset><legend>Goal: days per week</legend><div id="hTarget" class="target-row"></div></fieldset>
+      <div class="dialog-actions">
+        <button type="button" id="hDelete" class="danger" hidden>Delete</button>
+        <span class="grow"></span>
+        <button type="button" id="hCancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog">
+    <h2>Settings</h2>
+    <label>Theme
+      <select id="sTheme"><option value="auto">Match my device</option><option value="light">Light</option><option value="dark">Dark</option></select>
+    </label>
+    <label class="row"><span>Daily reminder</span><input type="checkbox" id="sRemind"></label>
+    <label>Remind me at<input type="time" id="sTime" value="20:00"></label>
+    <p class="note" id="sRemindNote"></p>
+    <div class="dialog-actions wrap">
+      <button type="button" id="sExport">⬇ Export backup</button>
+      <button type="button" id="sImport">⬆ Import backup</button>
+      <input type="file" id="sFile" accept="application/json" hidden>
+    </div>
+    <div class="dialog-actions"><span class="grow"></span><button type="button" id="sClose" class="primary">Done</button></div>
+  </dialog>
+
+  <div id="toast" class="toast" hidden><span id="toastText"></span><button id="toastAction" hidden></button></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <script src="stats.js"></script>
+  <script src="store.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
